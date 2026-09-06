@@ -1,6 +1,7 @@
-@FaturamentoService_HostAddress = http://localhost:5293
+@FaturamentoService_HostAddress = http://localhost:5002
 
-GET {{FaturamentoService_HostAddress}}/weatherforecast/
+GET {{FaturamentoService_HostAddress}}/
 Accept: application/json
+Content-Type: application/json
 
 ###

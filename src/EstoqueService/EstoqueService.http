@@ -1,6 +1,11 @@
-@EstoqueService_HostAddress = http://localhost:5259
+@EstoqueService_HostAddress = http://localhost:5001
 
-GET {{EstoqueService_HostAddress}}/weatherforecast/
+GET {{EstoqueService_HostAddress}}
+POST {{EstoqueService_HostAddress}}/api/produtos
+GET {{EstoqueService_HostAddress}}/api/produtos
+POST {{EstoqueService_HostAddress}}/api/produtos/reduzir-saldo
+PUT {{EstoqueService_HostAddress}}/api/produtos/{codigo}/saldo
 Accept: application/json
+Content-Type: application/json
 
 ###
