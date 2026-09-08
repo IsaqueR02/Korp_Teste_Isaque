@@ -1,6 +1,9 @@
 @FaturamentoService_HostAddress = http://localhost:5002
 
-GET {{FaturamentoService_HostAddress}}/
+GET {{FaturamentoService_HostAddress}}
+GET {{FaturamentoService_HostAddress}}/api/notasfiscais
+POST {{FaturamentoService_HostAddress}}/api/notasfiscais
+POST {{FaturamentoService_HostAddress}}/api/notasfiscais/{numero}/imprimir
 Accept: application/json
 Content-Type: application/json
 
