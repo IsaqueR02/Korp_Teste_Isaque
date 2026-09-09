@@ -26,17 +26,18 @@ namespace EstoqueService.Controllers
         public IActionResult ReduzirSaldo([FromServices] EstoqueDbContext context, [FromBody] Produto produto)
         {
             int codigo = produto.Codigo;
+            var produtoBanco = context.Produtos.FirstOrDefault(p => p.Codigo == codigo);
             decimal saldo = produto.Saldo;
-            decimal quantidadeSolicitada = context.Produtos.FirstOrDefault(p => p.Codigo == codigo)?.Saldo ?? 0; // Assuming the requested quantity is passed in the Saldo property for this example
-            if (produto == null)
+            decimal quantidadeSolicitada = produto.Saldo; // Assuming the requested quantity is passed in the Saldo property for this example
+            if (produtoBanco == null)
             {
                 return NotFound(new { message = $"Produto com código {codigo} não encontrado." });
             }
-            if (saldo < quantidadeSolicitada)
+            if (produtoBanco.Saldo < quantidadeSolicitada)
             {
                 return BadRequest(new { message = $"Saldo insuficiente para o produto {codigo}. Saldo atual: {produto.Saldo}, quantidade solicitada: {quantidadeSolicitada}." });
             }
-            saldo -= quantidadeSolicitada;
+            produtoBanco.Saldo -= quantidadeSolicitada;
             context.SaveChanges();
             return Ok(new { message = $"Saldo do produto {codigo} reduzido em {quantidadeSolicitada}. Saldo atual: {produto.Saldo}." });
         }
