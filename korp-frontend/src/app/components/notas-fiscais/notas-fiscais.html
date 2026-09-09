@@ -1,1 +1,150 @@
-<p>notas-fiscais works!</p>
+<div class="notas-container">
+  <!-- Banner de Erro 503 (Serviço de Estoque Indisponível) -->
+  <div class="alert alert-danger" *ngIf="erroServicoEstoque">
+    <div class="alert-content">
+      <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <div>
+        <strong>Serviço de Estoque Indisponível (HTTP 503)</strong>
+        <p>O serviço responsável pela validação e atualização do estoque está temporariamente indisponível. Por favor, tente novamente mais tarde.</p>
+      </div>
+    </div>
+    <button type="button" class="btn-close" (click)="fecharAlertaErro()" aria-label="Fechar alerta">&times;</button>
+  </div>
+
+  <header class="header">
+    <h2>Emissão e Gestão de Notas Fiscais</h2>
+    <p class="subtitle">Emita novas notas fiscais e acompanhe o status de processamento</p>
+  </header>
+
+  <!-- Card do Formulário de Abertura de Nota -->
+  <section class="card form-card">
+    <h3 class="card-title">Emitir Nova Nota Fiscal</h3>
+    <form (ngSubmit)="criarNota()" class="nota-form">
+      <div class="form-group">
+        <label for="produtoCodigo">Código do Produto</label>
+        <input
+          type="number"
+          id="produtoCodigo"
+          name="produtoCodigo"
+          class="form-control"
+          placeholder="Ex: 1"
+          [(ngModel)]="produtoCodigo"
+          min="1"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="quantidade">Quantidade</label>
+        <input
+          type="number"
+          id="quantidade"
+          name="quantidade"
+          class="form-control"
+          placeholder="Ex: 10"
+          [(ngModel)]="quantidade"
+          min="1"
+          required
+        />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Emitir Nota
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Card da Listagem -->
+  <section class="card table-card">
+    <div class="table-header">
+      <h3 class="card-title">Notas Fiscais Emitidas</h3>
+      <span class="badge-count" *ngIf="notas.length > 0">
+        {{ notas.length }} {{ notas.length === 1 ? 'nota' : 'notas' }}
+      </span>
+    </div>
+
+    <div class="table-responsive" *ngIf="notas.length > 0; else semNotas">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-seq">Número Sequencial</th>
+            <th class="col-status">Status</th>
+            <th class="col-itens">Itens</th>
+            <th class="col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let nota of notas">
+            <td class="col-seq">
+              <span class="seq-badge">NF-{{ nota.numeroSequencial }}</span>
+            </td>
+            <td class="col-status">
+              <span
+                class="status-badge"
+                [class.status-aberta]="nota.status.toLowerCase() === 'aberta' || nota.status.toLowerCase() === 'aberto'"
+                [class.status-fechada]="isNotaFechada(nota.status)"
+              >
+                {{ nota.status }}
+              </span>
+            </td>
+            <td class="col-itens">
+              <div class="itens-list">
+                <span class="item-chip" *ngFor="let item of nota.itens">
+                  Prod #{{ item.produtoCodigo }} &bull; <strong>{{ item.quantidade }} un</strong>
+                </span>
+              </div>
+            </td>
+            <td class="col-acoes">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                [disabled]="isNotaFechada(nota.status) || imprimindoIds.has(nota.numeroSequencial)"
+                (click)="imprimirNota(nota.numeroSequencial)"
+              >
+                <ng-container *ngIf="!imprimindoIds.has(nota.numeroSequencial)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  Imprimir
+                </ng-container>
+                <ng-container *ngIf="imprimindoIds.has(nota.numeroSequencial)">
+                  <span class="spinner"></span>
+                  Processando...
+                </ng-container>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #semNotas>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <p class="empty-text">Nenhuma nota fiscal emitida até o momento.</p>
+        <p class="empty-subtext">Preencha o formulário acima para realizar a emissão.</p>
+      </div>
+    </ng-template>
+  </section>
+</div>
+

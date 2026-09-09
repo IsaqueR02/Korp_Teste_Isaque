@@ -1,17 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { NotasFiscais } from './notas-fiscais';
+import { NotasFiscaisComponent } from './notas-fiscais';
 
-describe('NotasFiscais', () => {
-  let component: NotasFiscais;
-  let fixture: ComponentFixture<NotasFiscais>;
+describe('NotasFiscaisComponent', () => {
+  let component: NotasFiscaisComponent;
+  let fixture: ComponentFixture<NotasFiscaisComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NotasFiscais],
+      imports: [NotasFiscaisComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NotasFiscais);
+    fixture = TestBed.createComponent(NotasFiscaisComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
@@ -20,3 +23,4 @@ describe('NotasFiscais', () => {
     expect(component).toBeTruthy();
   });
 });
+
