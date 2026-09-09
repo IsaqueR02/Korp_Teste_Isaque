@@ -1,1 +1,97 @@
-<p>produtos works!</p>
+<div class="produtos-container">
+  <header class="header">
+    <h2>Gerenciamento de Produtos</h2>
+    <p class="subtitle">Cadastre novos produtos e acompanhe o saldo em estoque</p>
+  </header>
+
+  <!-- Card do Formulário -->
+  <section class="card form-card">
+    <h3 class="card-title">Novo Produto</h3>
+    <form (ngSubmit)="salvarProduto()" class="produto-form">
+      <div class="form-group">
+        <label for="descricao">Descrição</label>
+        <input
+          type="text"
+          id="descricao"
+          name="descricao"
+          class="form-control"
+          placeholder="Ex: Parafuso Sextavado M8"
+          [(ngModel)]="novaDescricao"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="saldo">Saldo Inicial</label>
+        <input
+          type="number"
+          id="saldo"
+          name="saldo"
+          class="form-control"
+          placeholder="Ex: 100"
+          [(ngModel)]="novoSaldo"
+          min="0"
+          required
+        />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Cadastrar
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Card da Tabela / Listagem -->
+  <section class="card table-card">
+    <div class="table-header">
+      <h3 class="card-title">Produtos Cadastrados</h3>
+      <span class="badge-count" *ngIf="produtos.length > 0">
+        {{ produtos.length }} {{ produtos.length === 1 ? 'item' : 'itens' }}
+      </span>
+    </div>
+
+    <div class="table-responsive" *ngIf="produtos.length > 0; else semProdutos">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-codigo">Código</th>
+            <th class="col-descricao">Descrição</th>
+            <th class="col-saldo">Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of produtos">
+            <td class="col-codigo"><span class="code-badge">#{{ p.codigo }}</span></td>
+            <td class="col-descricao">{{ p.descricao }}</td>
+            <td class="col-saldo">
+              <span class="saldo-badge" [class.negative]="p.saldo < 0" [class.zero]="p.saldo === 0">
+                {{ p.saldo | number }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #semProdutos>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <p class="empty-text">Nenhum produto cadastrado no momento.</p>
+        <p class="empty-subtext">Utilize o formulário acima para adicionar novos produtos.</p>
+      </div>
+    </ng-template>
+  </section>
+</div>
+
