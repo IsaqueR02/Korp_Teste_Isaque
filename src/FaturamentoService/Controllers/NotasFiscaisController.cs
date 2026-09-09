@@ -35,33 +35,35 @@ namespace FaturamentoService.Controllers
                 return NotFound(new { message = $"Nota Fiscal não encontrada." });
             }
             var statusFechada = NotaFiscal.statusNotaFiscal.Fechada;
-            try
-            {
-                foreach (var item in notaFiscal.Itens)
-                {
-                    var response = await client.PostAsync("http://localhost:5001/api/produtos/reduzir-saldo", JsonContent.Create(new { codigo = item.ProdutoCodigo, quantidade = item.Quantidade }));
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return Ok(new { message = $"Nota Fiscal {notaFiscal.NumeroSequencial} impressa com sucesso." });
-                    }
-                    else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-                    {
-                        var errorMessage = await response.Content.ReadAsStringAsync();
-                        return BadRequest(new { message = $"Erro ao reduzir saldo do produto {item.ProdutoCodigo}: {errorMessage}" });
-                    }
-                    else
-                    {
-                        return StatusCode(503, new { message = $"Erro ao reduzir saldo do produto {item.ProdutoCodigo}. Tente novamente mais tarde." });
-                    }
-                }
-            } catch (HttpRequestException) 
-            {
-                return StatusCode(503, new { message = $"Erro no fechamento da Nota Fiscal {notaFiscal.NumeroSequencial}. Não se preocupe, a Nota Fiscal será impressa assim que o problema for resolvido." });
-            }
             if (notaFiscal.Status == statusFechada)
             {
                 return BadRequest(new { message = $"Nota Fiscal {notaFiscal.NumeroSequencial} está fechada." });
             }
+            try
+            {
+                foreach (var item in notaFiscal.Itens)
+                {
+                    var response = await client.PostAsync("http://localhost:5001/api/produtos/reduzir-saldo", JsonContent.Create(new { codigo = item.ProdutoCodigo, saldo = item.Quantidade }));
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                        {
+                            var errorMessage = await response.Content.ReadAsStringAsync();
+                            return BadRequest(new { message = $"Erro ao reduzir saldo do produto {item.ProdutoCodigo}: {errorMessage}" });
+                        }
+                        else
+                        {
+                            return StatusCode(503, new { message = $"Erro ao reduzir saldo do produto {item.ProdutoCodigo}. Tente novamente mais tarde." });
+                        }
+                    }
+                }
+                notaFiscal.Status = statusFechada;
+                await context.SaveChangesAsync();
+            } catch (HttpRequestException) 
+            {
+                return StatusCode(503, new { message = $"Erro no fechamento da Nota Fiscal {notaFiscal.NumeroSequencial}. Não se preocupe, a Nota Fiscal será impressa assim que o problema for resolvido." });
+            }
+            
             await context.SaveChangesAsync();
             // Simulate printing the invoice
             // In a real application, you would send the invoice to a printer or generate a PDF
